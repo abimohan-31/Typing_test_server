@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import http from "http";
+import cors from "cors";
 import { Server } from "socket.io";
 
 import rootRouter from "./routes/index.js";
@@ -19,6 +20,7 @@ const io = new Server(server, {
   }
 });
 
+app.use(cors());
 app.use(express.json());
 
 const connectDB = async () => {
