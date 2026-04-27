@@ -112,3 +112,11 @@ export const getGroup = async (req, res, next) => {
     next(error);
   }
 };
+export const getLeaderGroups = async (req, res, next) => {
+  try {
+    const groups = await Group.find({ leaderId: req.user._id }).populate("members", "name email");
+    return sendResponse(res, 200, true, "Leader groups fetched", groups);
+  } catch (error) {
+    next(error);
+  }
+};
