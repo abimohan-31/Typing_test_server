@@ -9,6 +9,22 @@ const sessionSocket = (io) => {
       console.log(`Socket ${socket.id} joined group ${groupId}`);
     });
 
+    socket.on("joinSession", (sessionId) => {
+      socket.join(sessionId);
+      console.log(`Socket ${socket.id} joined session ${sessionId}`);
+    });
+
+    socket.on("updateProgress", (data) => {
+      const { sessionId, wpm, accuracy, userId } = data;
+      // Broadcast progress to everyone in the session
+      io.to(sessionId).emit("sessionUpdate", {
+        userId,
+        wpm,
+        accuracy,
+        timestamp: Date.now()
+      });
+    });
+
     socket.on("sessionStarted", async ({ groupId, text, duration }) => {
       io.to(groupId).emit("sessionStarted", { text, duration });
 
