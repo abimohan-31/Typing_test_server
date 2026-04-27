@@ -1,4 +1,6 @@
 import User from "../models/User.js";
+import Student from "../models/Student.js";
+import TeamLeader from "../models/TeamLeader.js";
 import jwt from "jsonwebtoken";
 import { sendResponse } from "../utils/responseHandler.js";
 
@@ -8,28 +10,112 @@ const generateToken = (id) => {
   });
 };
 
+export const registerStudent = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return sendResponse(res, 400, false, "Please provide all required fields");
+    }
+
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return sendResponse(res, 400, false, "User already exists");
+    }
+
+    const user = await User.create({
+      email,
+      password,
+      role: "student",
+    });
+
+    const studentProfile = await Student.create({
+      userId: user._id,
+      name,
+    });
+
+    return sendResponse(res, 201, true, "Student registered successfully", {
+      _id: user._id,
+      name: studentProfile.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const registerTeamLeader = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return sendResponse(res, 400, false, "Please provide all required fields");
+    }
+
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return sendResponse(res, 400, false, "User already exists");
+    }
+
+    const user = await User.create({
+      email,
+      password,
+      role: "team-leader",
+    });
+
+    const leaderProfile = await TeamLeader.create({
+      userId: user._id,
+      name,
+    });
+
+    return sendResponse(res, 201, true, "Team Leader registered successfully", {
+      _id: user._id,
+      name: leaderProfile.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const loginUser = async (req, res, next) => {
   try {
-    const { email } = req.body;
+    const { email, password } = req.body;
 
-    if (!email) {
-      return sendResponse(res, 400, false, "Please provide an email");
+    if (!email || !password) {
+      return sendResponse(res, 400, false, "Please provide email and password");
     }
 
     const user = await User.findOne({ email });
 
-    if (!user) {
-      return sendResponse(res, 401, false, "Invalid credentials");
-    }
+    if (user && (await user.matchPassword(password))) {
+      if (!user.isActive) {
+        return sendResponse(res, 401, false, "Account is disabled");
+      }
 
-    return sendResponse(res, 200, true, "Login successful", {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      groupId: user.groupId,
-      token: generateToken(user._id),
-    });
+      let profileData = {};
+      if (user.role === "student") {
+        const student = await Student.findOne({ userId: user._id });
+        if (student) profileData = { name: student.name, groupId: student.groupId };
+      } else if (user.role === "team-leader") {
+        const leader = await TeamLeader.findOne({ userId: user._id });
+        if (leader) profileData = { name: leader.name };
+      } else if (user.role === "admin") {
+        profileData = { name: "Admin" };
+      }
+
+      return sendResponse(res, 200, true, "Login successful", {
+        _id: user._id,
+        email: user.email,
+        role: user.role,
+        ...profileData,
+        token: generateToken(user._id),
+      });
+    } else {
+      return sendResponse(res, 401, false, "Invalid email or password");
+    }
   } catch (error) {
     next(error);
   }

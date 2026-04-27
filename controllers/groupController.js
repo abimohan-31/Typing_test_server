@@ -1,9 +1,9 @@
 import Group from "../models/Group.js";
-import User from "../models/User.js";
+import Student from "../models/Student.js";
 import { sendResponse } from "../utils/responseHandler.js";
 
 // @route POST /api/groups
-// @desc Create a new group (Leader only)
+// @desc Create a new group (Team Leader only)
 export const createGroup = async (req, res, next) => {
   try {
     const { name } = req.body;
@@ -15,12 +15,8 @@ export const createGroup = async (req, res, next) => {
     const group = await Group.create({
       name,
       leaderId: req.user._id,
-      members: [req.user._id],
+      members: [],
     });
-
-    // Update leader's groupId
-    req.user.groupId = group._id;
-    await req.user.save();
 
     return sendResponse(res, 201, true, "Group created successfully", group);
   } catch (error) {
@@ -29,7 +25,7 @@ export const createGroup = async (req, res, next) => {
 };
 
 // @route POST /api/groups/join
-// @desc Join a group
+// @desc Join a group (Student only)
 export const joinGroup = async (req, res, next) => {
   try {
     const { groupId } = req.body;
@@ -50,8 +46,12 @@ export const joinGroup = async (req, res, next) => {
     group.members.push(req.user._id);
     await group.save();
 
-    req.user.groupId = group._id;
-    await req.user.save();
+    // Update student's groupId
+    const student = await Student.findOne({ userId: req.user._id });
+    if (student) {
+      student.groupId = group._id;
+      await student.save();
+    }
 
     return sendResponse(res, 200, true, "Successfully joined group", group);
   } catch (error) {
@@ -60,7 +60,7 @@ export const joinGroup = async (req, res, next) => {
 };
 
 // @route DELETE /api/groups/:id/member
-// @desc Remove a member from the group (Leader only)
+// @desc Remove a member from the group (Team Leader only)
 export const removeMember = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -72,7 +72,7 @@ export const removeMember = async (req, res, next) => {
     }
 
     if (group.leaderId.toString() !== req.user._id.toString()) {
-      return sendResponse(res, 403, false, "Not authorized to remove members from this group");
+      return sendResponse(res, 403, false, "Not authorized to manage this group");
     }
 
     if (!group.members.includes(userId)) {
@@ -84,10 +84,10 @@ export const removeMember = async (req, res, next) => {
     );
     await group.save();
 
-    const user = await User.findById(userId);
-    if (user) {
-      user.groupId = null;
-      await user.save();
+    const student = await Student.findOne({ userId });
+    if (student) {
+      student.groupId = null;
+      await student.save();
     }
 
     return sendResponse(res, 200, true, "Member removed successfully", group);
@@ -102,7 +102,7 @@ export const getGroup = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const group = await Group.findById(id).populate("members", "name email role");
+    const group = await Group.findById(id).populate("members", "email role");
     if (!group) {
       return sendResponse(res, 404, false, "Group not found");
     }

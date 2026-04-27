@@ -3,13 +3,18 @@ import Group from "../models/Group.js";
 import { sendResponse } from "../utils/responseHandler.js";
 
 // @route POST /api/sessions/start
-// @desc Start a new session (Leader only)
+// @desc Start a new session (Team Leader only)
 export const startSession = async (req, res, next) => {
   try {
     const { text, duration, groupId } = req.body;
 
     if (!text || !duration || !groupId) {
-      return sendResponse(res, 400, false, "Text, duration, and groupId are required");
+      return sendResponse(
+        res,
+        400,
+        false,
+        "Text, duration, and groupId are required"
+      );
     }
 
     const group = await Group.findById(groupId);
@@ -18,16 +23,26 @@ export const startSession = async (req, res, next) => {
     }
 
     if (group.leaderId.toString() !== req.user._id.toString()) {
-      return sendResponse(res, 403, false, "Only the group leader can start a session");
+      return sendResponse(
+        res,
+        403,
+        false,
+        "Only the group leader can start a session"
+      );
     }
 
-    await Session.updateMany({ groupId, isActive: true }, { isActive: false });
+    // Mark previous active sessions as completed
+    await Session.updateMany(
+      { groupId, status: "active" },
+      { status: "completed" }
+    );
 
     const session = await Session.create({
       groupId,
       text,
       duration,
-      isActive: true,
+      startedAt: new Date(),
+      status: "active",
       results: [],
     });
 
@@ -38,7 +53,7 @@ export const startSession = async (req, res, next) => {
 };
 
 // @route POST /api/sessions/submit
-// @desc Submit typing results
+// @desc Submit typing results (Student only)
 export const submitSession = async (req, res, next) => {
   try {
     const { sessionId, typedText, timeTakenMinutes } = req.body;
@@ -57,11 +72,18 @@ export const submitSession = async (req, res, next) => {
       return sendResponse(res, 404, false, "Session not found");
     }
 
+    if (session.status !== "active") {
+      return sendResponse(res, 400, false, "Session is no longer active");
+    }
+
     const originalText = session.text;
-    const typedWords = typedText.trim().split(/\s+/).filter((word) => word.length > 0).length;
+    const typedWords = typedText
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
 
     let wpm = 0;
-    if (typedText.trim().length > 0) {
+    if (typedText.trim().length > 0 && timeTakenMinutes > 0) {
       wpm = Math.round(typedWords / timeTakenMinutes);
     }
 
@@ -85,11 +107,13 @@ export const submitSession = async (req, res, next) => {
     if (existingResultIndex !== -1) {
       session.results[existingResultIndex].wpm = wpm;
       session.results[existingResultIndex].accuracy = accuracy;
+      session.results[existingResultIndex].submittedAt = new Date();
     } else {
       session.results.push({
         userId: req.user._id,
         wpm,
         accuracy,
+        submittedAt: new Date(),
       });
     }
 
@@ -112,10 +136,16 @@ export const getSessions = async (req, res, next) => {
 
     const sessions = await Session.find({ groupId }).populate(
       "results.userId",
-      "name email"
+      "email"
     );
 
-    return sendResponse(res, 200, true, "Sessions fetched successfully", sessions);
+    return sendResponse(
+      res,
+      200,
+      true,
+      "Sessions fetched successfully",
+      sessions
+    );
   } catch (error) {
     next(error);
   }

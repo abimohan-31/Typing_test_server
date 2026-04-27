@@ -4,11 +4,9 @@ import dotenv from "dotenv";
 import http from "http";
 import { Server } from "socket.io";
 
-import authRoutes from "./routes/authRoutes.js";
-import groupRoutes from "./routes/groupRoutes.js";
-import sessionRoutes from "./routes/sessionRoutes.js";
+import rootRouter from "./routes/index.js";
 import { notFound, errorHandler } from "./middlewares/errorHandler.js";
-import socketHandler from "./sockets/socketHandler.js";
+import sessionSocket from "./sockets/sessionSocket.js";
 
 dotenv.config();
 
@@ -39,12 +37,10 @@ const connectDB = async () => {
 connectDB();
 
 // Setup Socket.IO
-socketHandler(io);
+sessionSocket(io);
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/groups", groupRoutes);
-app.use("/api/sessions", sessionRoutes);
+// Root Router
+app.use("/api", rootRouter);
 
 app.get("/", (req, res) => {
   res.send("Express API is running...");
