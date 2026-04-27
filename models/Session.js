@@ -15,6 +15,15 @@ const sessionSchema = new mongoose.Schema(
       type: Number, // in minutes
       required: true,
     },
+    startedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "active", "completed"],
+      default: "pending",
+    },
     results: [
       {
         userId: {
@@ -29,12 +38,12 @@ const sessionSchema = new mongoose.Schema(
           type: Number,
           default: 0,
         },
+        submittedAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
   },
   { timestamps: true }
 );
