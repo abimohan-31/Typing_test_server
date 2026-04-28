@@ -24,6 +24,9 @@ const groupSchema = new mongoose.Schema(
     sessionStartTime: {
       type: Date,
     },
+    sessionDuration: {
+      type: Number, // duration in seconds
+    },
   },
   { timestamps: true }
 );

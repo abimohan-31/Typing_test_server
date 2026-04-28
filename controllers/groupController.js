@@ -154,6 +154,7 @@ export const deleteGroup = async (req, res, next) => {
 export const startSession = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const { duration } = req.body;
     const group = await Group.findById(id);
 
     if (!group) {
@@ -166,6 +167,7 @@ export const startSession = async (req, res, next) => {
 
     group.activeSession = true;
     group.sessionStartTime = new Date();
+    group.sessionDuration = duration || 60; // Default to 60s if not provided
     await group.save();
 
     return sendResponse(res, 200, true, "Session started successfully", group);
