@@ -2,16 +2,12 @@ import Session from "../models/Session.js";
 
 const sessionSocket = (io) => {
   io.on("connection", (socket) => {
-    console.log(`User connected to session socket: ${socket.id}`);
-
     socket.on("joinGroup", ({ groupId }) => {
       socket.join(groupId);
-      console.log(`Socket ${socket.id} joined group ${groupId}`);
     });
 
     socket.on("joinSession", (sessionId) => {
       socket.join(sessionId);
-      console.log(`Socket ${socket.id} joined session ${sessionId}`);
     });
 
     socket.on("updateProgress", (data) => {
@@ -51,7 +47,6 @@ const sessionSocket = (io) => {
     });
 
     socket.on("disconnect", () => {
-      console.log(`User disconnected: ${socket.id}`);
     });
   });
 };
