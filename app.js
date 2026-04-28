@@ -58,5 +58,20 @@ connectDB()
   .catch((error) => {
     console.error("Failed to connect to MongoDB. Server not started.");
     console.error(error);
+
+    const allowNoDb = String(process.env.START_WITHOUT_DB || "")
+      .trim()
+      .toLowerCase();
+
+    if (allowNoDb === "true" || allowNoDb === "1" || allowNoDb === "yes") {
+      console.warn(
+        "START_WITHOUT_DB enabled: starting server without MongoDB connection."
+      );
+      server.listen(PORT, () =>
+        console.log(`Server is running on http://localhost:${PORT}`)
+      );
+      return;
+    }
+
     process.exitCode = 1;
   });
