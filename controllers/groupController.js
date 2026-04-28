@@ -148,3 +148,53 @@ export const deleteGroup = async (req, res, next) => {
     next(error);
   }
 };
+
+// @route POST /api/groups/:id/start-session
+// @desc Start a group practice session (Team Leader only)
+export const startSession = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const group = await Group.findById(id);
+
+    if (!group) {
+      return sendResponse(res, 404, false, "Group not found");
+    }
+
+    if (group.leaderId.toString() !== req.user._id.toString()) {
+      return sendResponse(res, 403, false, "Not authorized to manage this group");
+    }
+
+    group.activeSession = true;
+    group.sessionStartTime = new Date();
+    await group.save();
+
+    return sendResponse(res, 200, true, "Session started successfully", group);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @route POST /api/groups/:id/stop-session
+// @desc Stop a group practice session (Team Leader only)
+export const stopSession = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const group = await Group.findById(id);
+
+    if (!group) {
+      return sendResponse(res, 404, false, "Group not found");
+    }
+
+    if (group.leaderId.toString() !== req.user._id.toString()) {
+      return sendResponse(res, 403, false, "Not authorized to manage this group");
+    }
+
+    group.activeSession = false;
+    group.sessionStartTime = null;
+    await group.save();
+
+    return sendResponse(res, 200, true, "Session stopped successfully", group);
+  } catch (error) {
+    next(error);
+  }
+};

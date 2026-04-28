@@ -17,6 +17,13 @@ const groupSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    activeSession: {
+      type: Boolean,
+      default: false,
+    },
+    sessionStartTime: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
