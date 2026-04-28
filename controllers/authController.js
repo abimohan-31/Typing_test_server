@@ -33,12 +33,20 @@ export const registerStudent = async (req, res, next) => {
       name,
     });
 
+    const token = generateToken(user._id);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
     return sendResponse(res, 201, true, "Student registered successfully", {
       _id: user._id,
       name: studentProfile.name,
       email: user.email,
       role: user.role,
-      token: generateToken(user._id),
     });
   } catch (error) {
     next(error);
@@ -68,12 +76,20 @@ export const registerTeamLeader = async (req, res, next) => {
       name,
     });
 
+    const token = generateToken(user._id);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
     return sendResponse(res, 201, true, "Team Leader registered successfully", {
       _id: user._id,
       name: leaderProfile.name,
       email: user.email,
       role: user.role,
-      token: generateToken(user._id),
     });
   } catch (error) {
     next(error);
@@ -106,12 +122,20 @@ export const loginUser = async (req, res, next) => {
         profileData = { name: "Admin" };
       }
 
+      const token = generateToken(user._id);
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      });
+
       return sendResponse(res, 200, true, "Login successful", {
         _id: user._id,
         email: user.email,
         role: user.role,
         ...profileData,
-        token: generateToken(user._id),
       });
     } else {
       return sendResponse(res, 401, false, "Invalid email or password");
