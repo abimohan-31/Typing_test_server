@@ -120,3 +120,29 @@ export const getLeaderGroups = async (req, res, next) => {
     next(error);
   }
 };
+
+// @route DELETE /api/groups/:id
+// @desc Delete a group (Team Leader only)
+export const deleteGroup = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const group = await Group.findById(id);
+    if (!group) {
+      return sendResponse(res, 404, false, "Group not found");
+    }
+
+    if (group.leaderId.toString() !== req.user._id.toString()) {
+      return sendResponse(res, 403, false, "Not authorized to delete this group");
+    }
+
+    // Remove group reference from students
+    await Student.updateMany({ groupId: id }, { $set: { groupId: null } });
+
+    await Group.findByIdAndDelete(id);
+
+    return sendResponse(res, 200, true, "Group deleted successfully");
+  } catch (error) {
+    next(error);
+  }
+};
