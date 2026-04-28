@@ -9,7 +9,7 @@
     "dev": "nodemon app.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Abi Mohan",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.3",
