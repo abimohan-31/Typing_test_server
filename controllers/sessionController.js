@@ -58,7 +58,7 @@ export const submitSession = async (req, res, next) => {
   try {
     const { sessionId, typedText, timeTakenMinutes } = req.body;
 
-    if (!sessionId || typedText === undefined || !timeTakenMinutes) {
+    if (!sessionId || typedText === undefined || timeTakenMinutes == null) {
       return sendResponse(
         res,
         400,

@@ -2,7 +2,6 @@ import User from "../models/User.js";
 import Student from "../models/Student.js";
 import TeamLeader from "../models/TeamLeader.js";
 import { sendResponse } from "../utils/responseHandler.js";
-import bcrypt from "bcryptjs";
 
 export const getMe = async (req, res, next) => {
   try {
