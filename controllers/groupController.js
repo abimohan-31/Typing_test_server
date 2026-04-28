@@ -102,7 +102,9 @@ export const getGroup = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const group = await Group.findById(id).populate("members", "email role");
+    const group = await Group.findById(id)
+      .populate("members", "name email role")
+      .populate("leaderId", "name email");
     if (!group) {
       return sendResponse(res, 404, false, "Group not found");
     }
