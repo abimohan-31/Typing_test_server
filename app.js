@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import http from "http";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 
 import rootRouter from "./routes/index.js";
