@@ -16,12 +16,25 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    credentials: true,
     methods: ["GET", "POST", "DELETE"]
   }
 });
 
-app.use(cors());
+// Use cookie-parser before routes
+app.use(cookieParser());
+
+// Configure CORS with credentials support
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(express.json());
 
 async function connectDB() {
