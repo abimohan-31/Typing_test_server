@@ -5,11 +5,15 @@ import http from "http";
 import cors from "cors";
 import { Server } from "socket.io";
 
+// Load environment variables as early as possible
+dotenv.config();
+
+// Disable buffering so we get immediate errors if not connected
+mongoose.set("bufferCommands", false);
+
 import rootRouter from "./routes/index.js";
 import { notFound, errorHandler } from "./middlewares/errorHandler.js";
 import sessionSocket from "./sockets/sessionSocket.js";
-
-dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
@@ -73,11 +77,20 @@ const PORT = process.env.PORT || 5000;
 async function connectDB() {
   const uri = process.env.MONGO_URI;
   if (!uri) {
-    console.warn("MONGO_URI not found in env.");
+    console.error("CRITICAL: MONGO_URI not found in environment variables!");
     return;
   }
-  await mongoose.connect(uri);
-  console.log("Connected to MongoDB!");
+  
+  console.log("Attempting to connect to MongoDB...");
+  try {
+    await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 5000, // Fail after 5 seconds instead of 30
+    });
+    console.log("Successfully connected to MongoDB!");
+  } catch (error) {
+    console.error("MongoDB connection error:", error.message);
+    throw error; // Rethrow to be caught by the caller
+  }
 }
 
 connectDB()
