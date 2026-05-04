@@ -8,8 +8,7 @@ import { Server } from "socket.io";
 // Load environment variables as early as possible
 dotenv.config();
 
-// Disable buffering so we get immediate errors if not connected
-mongoose.set("bufferCommands", false);
+
 
 import rootRouter from "./routes/index.js";
 import { notFound, errorHandler } from "./middlewares/errorHandler.js";
