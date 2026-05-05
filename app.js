@@ -100,6 +100,14 @@ connectDB()
   })
   .catch((error) => {
     console.error("Failed to connect to MongoDB. Server not started.");
-    console.error(error);
+    if (error.name === "MongooseServerSelectionError" && error.message.includes("IP that isn't whitelisted")) {
+      console.error("\n=======================================================");
+      console.error("🛑 MONGODB IP WHITELIST ERROR 🛑");
+      console.error("Your deployment environment (like Railway) is blocked from accessing MongoDB.");
+      console.error("To fix this, log in to MongoDB Atlas -> Network Access -> Add IP Address -> Allow Access From Anywhere (0.0.0.0/0).");
+      console.error("=======================================================\n");
+    } else {
+      console.error(error);
+    }
     process.exit(1);
   });
