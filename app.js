@@ -21,7 +21,6 @@ const io = new Server(server, {
     origin: [
       "http://localhost:3000",
       "http://127.0.0.1:3000",
-      "typingtestclient.up.railway.app"
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
@@ -47,7 +46,6 @@ app.use(
     origin: [
       "http://localhost:3000",
       "http://127.0.0.1:3000",
-      "typingtestclient.up.railway.app"
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -79,7 +77,7 @@ async function connectDB() {
     console.error("CRITICAL: MONGO_URI not found in environment variables!");
     return;
   }
-  
+
   console.log("Attempting to connect to MongoDB...");
   try {
     await mongoose.connect(uri, {
