@@ -21,7 +21,7 @@ const io = new Server(server, {
     origin: [
       "http://localhost:3000",
       "http://127.0.0.1:3000",
-      "https://typingtestclientrepo-production.up.railway.app"
+      "typingtestclient.up.railway.app"
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
@@ -47,7 +47,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "http://127.0.0.1:3000",
-      "https://typingtestclientrepo-production.up.railway.app"
+      "typingtestclient.up.railway.app"
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -102,7 +102,7 @@ connectDB()
     console.error("Failed to connect to MongoDB. Server not started.");
     if (error.name === "MongooseServerSelectionError" && error.message.includes("IP that isn't whitelisted")) {
       console.error("\n=======================================================");
-      console.error("🛑 MONGODB IP WHITELIST ERROR 🛑");
+      console.error("MONGODB IP WHITELIST ERROR");
       console.error("Your deployment environment (like Railway) is blocked from accessing MongoDB.");
       console.error("To fix this, log in to MongoDB Atlas -> Network Access -> Add IP Address -> Allow Access From Anywhere (0.0.0.0/0).");
       console.error("=======================================================\n");
