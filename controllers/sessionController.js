@@ -1,20 +1,48 @@
 import Session from "../models/Session.js";
 import Group from "../models/Group.js";
 import { sendResponse } from "../utils/responseHandler.js";
+import { generateAIPassage } from "../services/aiService.js";
+
+// @route POST /api/sessions/generate-passage
+// @desc Automatically generate typing test passage via AI based on selected time limit
+export const generatePassage = async (req, res, next) => {
+  try {
+    const { duration } = req.body;
+    const durationMinutes = Number(duration) || 1;
+
+    const result = await generateAIPassage(durationMinutes);
+
+    return sendResponse(
+      res,
+      200,
+      true,
+      "Typing passage generated successfully",
+      result
+    );
+  } catch (error) {
+    next(error);
+  }
+};
 
 // @route POST /api/sessions/start
 // @desc Start a new session (Team Leader only)
 export const startSession = async (req, res, next) => {
   try {
-    const { text, duration, groupId } = req.body;
+    let { text, duration, groupId } = req.body;
 
-    if (!text || !duration || !groupId) {
+    if (!duration || !groupId) {
       return sendResponse(
         res,
         400,
         false,
-        "Text, duration, and groupId are required"
+        "Duration and groupId are required"
       );
+    }
+
+    // If text is missing or explicitly requested AI, generate passage using AI
+    if (!text || text.trim() === "") {
+      const aiResult = await generateAIPassage(duration);
+      text = aiResult.text;
     }
 
     const group = await Group.findById(groupId);
