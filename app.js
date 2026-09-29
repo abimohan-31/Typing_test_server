@@ -16,12 +16,14 @@ import sessionSocket from "./sockets/sessionSocket.js";
 
 const app = express();
 const server = http.createServer(app);
+const corsOrigin = (origin, callback) => {
+  // Allow all origins in local network development mode
+  callback(null, true);
+};
+
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-    ],
+    origin: corsOrigin,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
   }
@@ -43,10 +45,7 @@ app.use((req, res, next) => {
 // Configure CORS with credentials support
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-    ],
+    origin: corsOrigin,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -92,8 +91,8 @@ async function connectDB() {
 
 connectDB()
   .then(() => {
-    server.listen(PORT, () =>
-      console.log(`Server is running on http://localhost:${PORT}`)
+    server.listen(PORT, "0.0.0.0", () =>
+      console.log(`Server is running on http://0.0.0.0:${PORT} (LAN reachable)`)
     );
   })
   .catch((error) => {

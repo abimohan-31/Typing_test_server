@@ -104,6 +104,42 @@ export const toggleUserStatus = async (req, res, next) => {
     next(error);
   }
 };
+// @route   DELETE /api/admin/users/:id
+// @desc    Delete user account and associated profile data
+// @access  Private/Admin
+export const deleteUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (id === req.user._id.toString()) {
+      return sendResponse(res, 400, false, "You cannot delete your own admin account");
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      return sendResponse(res, 404, false, "User not found");
+    }
+
+    if (user.role === "student") {
+      await Student.findOneAndDelete({ userId: id });
+      await Group.updateMany({ members: id }, { $pull: { members: id } });
+    } else if (user.role === "team-leader") {
+      await TeamLeader.findOneAndDelete({ userId: id });
+      const leaderGroups = await Group.find({ leaderId: id });
+      for (const g of leaderGroups) {
+        await Student.updateMany({ groupId: g._id }, { $set: { groupId: null } });
+        await Session.deleteMany({ groupId: g._id });
+        await Group.findByIdAndDelete(g._id);
+      }
+    }
+
+    await User.findByIdAndDelete(id);
+
+    return sendResponse(res, 200, true, "User deleted successfully");
+  } catch (error) {
+    next(error);
+  }
+};
 
 // @route   GET /api/admin/groups
 // @desc    Get all groups in system
@@ -128,4 +164,4 @@ export const getGroups = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
+}

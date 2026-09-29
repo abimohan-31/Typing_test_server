@@ -3,6 +3,7 @@ import {
   getAnalytics,
   getUsers,
   toggleUserStatus,
+  deleteUser,
   getGroups,
 } from "../controllers/adminController.js";
 import { auth } from "../middlewares/auth.js";
@@ -17,6 +18,7 @@ router.use(requireRole(["admin"]));
 router.get("/analytics", getAnalytics);
 router.get("/users", getUsers);
 router.put("/users/:id/toggle", toggleUserStatus);
+router.delete("/users/:id", deleteUser);
 router.get("/groups", getGroups);
 
 export default router;
