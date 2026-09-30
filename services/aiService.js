@@ -5,18 +5,23 @@ dotenv.config();
  * Topics pool to ensure high diversity across multiple generations
  */
 const TOPIC_POOL = [
-  "the evolution of modern technology and artificial intelligence",
-  "exploring the mysteries of deep oceans and marine biology",
-  "the history of space exploration and distant planetary systems",
-  "the psychology of habits, focus, and human productivity",
-  "sustainable energy, solar innovations, and preserving our planet",
-  "the art of architecture and how buildings shape civilization",
-  "the power of storytelling, literature, and human communication",
-  "classical music, sound design, and the science of acoustics",
-  "the wonders of ancient history and forgotten archaeological sites",
-  "mindfulness, resilience, and maintaining balance in modern life",
-  "the rise of global transportation, aviation, and superfast trains",
-  "culinary arts, global spices, and the culture of shared meals"
+  "the evolution of modern technology, quantum computing, and artificial intelligence",
+  "exploring the mysteries of deep oceans, hydrothermal vents, and marine ecosystems",
+  "the history of space exploration, robotic Mars rovers, and distant planetary systems",
+  "the psychology of focus, neuroplasticity, and human habit formation",
+  "sustainable clean energy, solar battery storage, and ecological preservation",
+  "the art of architecture and how urban spaces foster vibrant communities",
+  "the power of storytelling, classical literature, and human communication",
+  "sound design, orchestral acoustics, and the neuroscience of music",
+  "the wonders of ancient civilizations, archaeology, and historical migrations",
+  "mindfulness, emotional resilience, and maintaining mental clarity",
+  "the rise of modern aviation, high-speed rail, and global transport",
+  "culinary arts, botanical spices, and cultural dining traditions",
+  "microbiology, cellular biology, and the microscopic world",
+  "geological formations, glacial valleys, and tectonic forces",
+  "cybersecurity, cryptography, and safeguarding modern networks",
+  "renewable robotics, biomimicry, and nature-inspired design",
+  "astronomy, black holes, gravitational waves, and stellar nebulae"
 ];
 
 /**
@@ -109,9 +114,10 @@ STRICT RULES:
 
   // Candidate models to try in order
   const models = [
-    "gemini-2.5-flash",
-    "gemini-1.5-flash",
-    "gemini-2.0-flash",
+    "gemini-3.5-flash",
+    "gemini-3.8-flash",
+    "gemini-3-flash-preview",
+    "gemini-3.5-flash-lite",
   ];
 
   for (const model of models) {
@@ -122,6 +128,7 @@ STRICT RULES:
         headers: {
           "Content-Type": "application/json",
         },
+        signal: AbortSignal.timeout(8000),
         body: JSON.stringify({
           contents: [
             {
@@ -129,7 +136,7 @@ STRICT RULES:
             },
           ],
           generationConfig: {
-            temperature: 0.9,
+            temperature: 0.95,
             maxOutputTokens: Math.min(8192, Math.max(1000, targetWordCount * 6)),
           },
         }),
